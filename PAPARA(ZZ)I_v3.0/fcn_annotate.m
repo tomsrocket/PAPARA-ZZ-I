@@ -25,7 +25,9 @@ function fid = fcn_annotate(fid,h,CP,str,annotype,colorcode)
 
 
 %%
-if exist('colorcode','var')~=1, colorcode = 'y'; end % default color is yellow
+if exist('colorcode','var')~=1 || isempty(colorcode)
+    colorcode = fcn_keyword_color(str,gcbf);
+end
 
 % Write annotation
 if isempty(str) || strcmp(str,' ')==1, return; end
@@ -34,7 +36,10 @@ fprintf(fid,'%f\t%f\t%s\r\n',CP(1,1),CP(1,2),str);
 switch annotype
     case 'Annotation'
         cbfun = ['fid = fcn_seldelA(fid,gcbf,gcbo,infotxt,''',str,''');'];
-        plot(h,CP(1,1),CP(1,2),'o','Color',colorcode,'Tag','Annotation',...
+        userdata = struct('baseColor',colorcode,'keyword',str);
+        plot(h,CP(1,1),CP(1,2),'o','Color',colorcode,...
+            'MarkerFaceColor','none','MarkerSize',7,'LineWidth',1.2,...
+            'Tag','Annotation','UserData',userdata,...
             'ButtonDownFcn',cbfun);
         
     case 'GeneratedPoint' % not needed at the moment

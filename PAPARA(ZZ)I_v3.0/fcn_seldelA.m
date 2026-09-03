@@ -34,7 +34,15 @@ switch mousestate
             case 'off'
                 % Un-select previously selected objects
                 set(findobj(gca,'Selected','on'),'Selected','off');
-                set(findobj(gca,'Color','r'),'Color','y');
+                hAnnotations = findobj(gca,'Tag','Annotation');
+                for ii = 1:numel(hAnnotations)
+                    ud = get(hAnnotations(ii),'UserData');
+                    if isstruct(ud) && isfield(ud,'baseColor')
+                        set(hAnnotations(ii),'Color',ud.baseColor);
+                    else
+                        set(hAnnotations(ii),'Color','y');
+                    end
+                end
                 
                 % Select current object
                 set(h_gcbo,'Selected','on');
@@ -43,7 +51,10 @@ switch mousestate
                 set(infotxt,'TooltipString',get(infotxt,'String'));
                 
             case 'on'
-                if ~all(get(h_gcbo,'Color')==[0,1,1]) % check if cyan
+                ud = get(h_gcbo,'UserData');
+                if isstruct(ud) && isfield(ud,'baseColor')
+                    set(h_gcbo,'Color',ud.baseColor);
+                else
                     set(h_gcbo,'Color','y');
                 end
                 set(h_gcbo,'Selected','off');
@@ -91,7 +102,15 @@ switch mousestate
         
         % Un-select previously selected objects
         set(findobj(gca,'Selected','on'),'Selected','off');
-        set(findobj(gca,'Color','r'),'Color','y');
+        hAnnotations = findobj(gca,'Tag','Annotation');
+        for ii = 1:numel(hAnnotations)
+            ud = get(hAnnotations(ii),'UserData');
+            if isstruct(ud) && isfield(ud,'baseColor')
+                set(hAnnotations(ii),'Color',ud.baseColor);
+            else
+                set(hAnnotations(ii),'Color','y');
+            end
+        end
         
         set(h_gcbo,'Selected','on','Color','r');
         str = ['Current selection: ' selstr];

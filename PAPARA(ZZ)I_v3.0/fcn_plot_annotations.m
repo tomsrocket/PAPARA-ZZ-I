@@ -169,8 +169,12 @@ if ~isempty(x) && get(hhideshow,'Value') == 1
             % Draw annotations
             switch annotype
                 case 'Annotation'
-                    cbfun = ['fid = fcn_seldelA(fid,gcbf,gcbo,infotxt,''',strlist{k},''');'];
-                    plot(h,x(k),y(k),'o','Color','y','ButtonDownFcn',cbfun,'Tag','Annotation');
+                    cbfun = ['fid = fcn_seldelA(fid,gcbf,gcbo,infotxt,'''',strlist{k},'''');'];
+                    colorcode = fcn_keyword_color(strlist{k},ancestor(h,'figure'));
+                    userdata = struct('baseColor',colorcode,'keyword',strlist{k});
+                    plot(h,x(k),y(k),'o','Color',colorcode,...
+                        'MarkerFaceColor','none','MarkerSize',7,'LineWidth',1.2,...
+                        'ButtonDownFcn',cbfun,'Tag','Annotation','UserData',userdata);
                     
                 case 'GeneratedPoint'
                     

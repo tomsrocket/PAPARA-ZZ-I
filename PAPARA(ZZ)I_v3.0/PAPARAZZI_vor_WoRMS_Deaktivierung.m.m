@@ -1,4 +1,4 @@
-%% Copyright 2015-2022 Yann Marcon and Autun PursercreateClassFromWsdl
+%% Copyright 2015-2022 Yann Marcon and Autun Purser
 
 % This file is part of PAPARA(ZZ)I.
 % 
@@ -43,8 +43,71 @@ end
 warning off all;
 
 % Add to path
-%% WoRMS temporarily disabled for local test
-objWoRMS = [];
+if isdeployed
+    
+    % path of deployed code with subfolders
+    pathsToAdd = {genpath(fullfile(ctfroot))};
+    try
+        for str = pathsToAdd
+            % temporarily add folders to the OS path
+            setenv('PATH',[getenv('PATH') ';' str{1}]);
+        end
+    end
+    
+%    % Path to WoRMS 'aphia.xml' file
+%    WoRMSfile = 'aphia.xml';
+    
+%    % Create the WoRMS class in current folder
+%    % (I know changing the current folder is bad practice but i did not
+%    % find a better solution to prevent the Aphia Name Service folder from
+%    % being created wherever the current folder is. Although, there were
+%    % permissions issues when deploying in Linux, which are now solved. The
+%    % new 'matlab.wsdl.createWSDLClient' command present in MATLAB 2015b
+%    % could solve this issue more elegantly but it does not work in older
+%    % MATLAB versions and it needs additional dependencies to be installed
+%    % separately, which makes the whole deployed program less of a turnkey
+%    % product for the non computer-oriented users).
+%    currentfolder = pwd;
+%    cd(ctfroot); % change current folder 
+%    createClassFromWsdl(WoRMSfile);
+%    cd(currentfolder); % change current folder back
+    
+    
+%     % Get path of the exe file where the WoRMS libraries are:
+%     [status, result] = system('set PATH');
+%     exePath = char(regexpi(result, 'Path=(.*?);', 'tokens', 'once'));
+%
+%     % Copy the WoRMS libraries to the deployed path
+%     sourcefolder = [exePath sep 'WoRMS'];
+%     destinationfolder = [ctfroot sep 'WoRMS'];
+%     if exist(sourcefolder,'folder')==7 && ...
+%             exist(destinationfolder,'folder')~=7
+%         % if source folder exists and destination folder does not exist
+%         
+%         copyfile(sourcefolder,destinationfolder,'f');
+%     end
+%        
+%     % path of deployed code with subfolders
+%     pathsToAdd = {genpath(fullfile(ctfroot))};
+%     try
+%         for str = pathsToAdd
+%             % temporarily add folders to the OS path
+%             setenv('PATH',[getenv('PATH') ';' str{1}]);
+%         end
+%     end
+    
+%else
+%    mPath = fileparts(mfilename('fullpath')); % path to folder where PAPARAZZI.m is located
+%    % WoRMSpath = [mPath sep 'WoRMS' sep];
+%    WoRMSpath = [mPath sep];
+%    addpath(WoRMSpath);
+%    WoRMSfile = [WoRMSpath 'aphia.xml'];
+    
+%    createClassFromWsdl(WoRMSfile);
+%end
+
+% Create a WoRMS object from the WoRMS class
+%objWoRMS = AphiaNameService;
 
 
 
@@ -286,16 +349,39 @@ cb100Random = horzcat('pointtype = ''random''; pointmax = 100; ',...
 cbXRandom = horzcat('pointtype = ''random''; pointmax = fcn_Xpoints(); ',...
     'fcn_updateGPicon(pointtype); init_disp_image;');
 cbPoints = [ {cbPointsDefault},{cb10Grid},{cb100Grid},{cbXGrid},{cb10Random},{cb100Random},{cbXRandom} ];
-cbSaveDefault = horzcat( ...
-    'imformat = ''PNG''; ', ...
-    'fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype);');
-cbSavePNG = horzcat( ...
-    'imformat = ''PNG''; ', ...
-    'fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype);');
-cbSaveJPG = horzcat( ...
-    'imformat = ''JPG''; ', ...
-    'fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype);');
-cbSave = [ {cbSaveDefault},{cbSavePNG},{cbSaveJPG} ];
+cbSaveDefault = horzcat('if exist(''imformat'',''var'')~=1, ',...
+    'set(hSave,''State'',''off''); return; end; ',...
+    'switch imformat, case {''JPG'',''TIF''},', ...
+    'switch get(hPoints,''State''), ',...
+    'case ''off'', fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype); ',...
+    'case ''on'', fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype,pointtype,pointmax); ',...
+    'end;',...
+    'case {''EPS2'',''EPS3''},', ...
+    'switch get(hPoints,''State''), ',...
+    'case ''off'', fcn_save_eps(n,imagelist,inpath,userid,sep,h,imformat,annotype); ',...
+    'case ''on'', fcn_save_eps(n,imagelist,inpath,userid,sep,h,imformat,annotype,pointtype,pointmax); ',...
+    'end; end; set(hSave,''State'',''off'');');
+cbSaveJPG = horzcat('imformat = ''JPG''; fcn_updateSAVEicon(imformat); ',...
+    'switch get(hPoints,''State''), ',...
+    'case ''off'', fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype); ',...
+    'case ''on'', fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype,pointtype,pointmax); ',...
+    'end; set(hSave,''State'',''off'');');
+cbSaveTIF = horzcat('imformat = ''TIF''; fcn_updateSAVEicon(imformat); ',...
+    'switch get(hPoints,''State''), ',...
+    'case ''off'', fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype); ',...
+    'case ''on'', fcn_save_image(n,imagelist,inpath,userid,sep,h,imformat,annotype,pointtype,pointmax); ',...
+    'end; set(hSave,''State'',''off'');');
+cbSaveEPS2 = horzcat('imformat = ''EPS2''; fcn_updateSAVEicon(imformat); ',...
+    'switch get(hPoints,''State''), ',...
+    'case ''off'', fcn_save_eps(n,imagelist,inpath,userid,sep,h,imformat,annotype); ',...
+    'case ''on'', fcn_save_eps(n,imagelist,inpath,userid,sep,h,imformat,annotype,pointtype,pointmax); ',...
+    'end; set(hSave,''State'',''off'');');
+cbSaveEPS3 = horzcat('imformat = ''EPS3''; fcn_updateSAVEicon(imformat); ',...
+    'switch get(hPoints,''State''), ',...
+    'case ''off'', fcn_save_eps(n,imagelist,inpath,userid,sep,h,imformat,annotype); ',...
+    'case ''on'', fcn_save_eps(n,imagelist,inpath,userid,sep,h,imformat,annotype,pointtype,pointmax); ',...
+    'end; set(hSave,''State'',''off'');');
+cbSave = [ {cbSaveDefault},{cbSaveJPG},{cbSaveTIF},{cbSaveEPS2},{cbSaveEPS3} ];
 cbDs = horzcat('dsflag = get(h_dscb,''Value''); ',...
     'fcn_displayresolution(h,h_ds,h_ppi,dsflag,[],n,imagelist,inpath,userid,sep);');
 cbPPI = horzcat('if isnan(str2double(get(h_ppi,''String'')))',...
@@ -369,8 +455,15 @@ fig_main = figure('MenuBar','figure','NumberTitle','off','Name',figname,...
     'if exist(''fid'',''var'')==1  && ~isempty(fopen(fid)), ',...
     'fclose(fid); end;'],'Visible','off');
 
-% PAPARA(ZZ)I icon disabled for compatibility with current MATLAB versions.
-% The JavaFrame property is no longer available.
+% Show PAPARA(ZZ)I icon in main figure
+iconfile = 'paparazzi_icon_16.png';
+if isdeployed
+    iconfile = [ ctfroot sep 'PAPARAZZI' sep iconfile ];
+end
+warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
+jframe=get(fig_main,'javaframe');
+jIcon=javax.swing.ImageIcon(iconfile);
+jframe.setFigureIcon(jIcon);
 
 % Hide unwanted tools from menubar and toolbar
 [hPoints,hSave] = fcn_ctrl_FigTools(fig_main,'off',cbPrevSection,...

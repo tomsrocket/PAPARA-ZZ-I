@@ -115,73 +115,25 @@ hIgnore = uitoggletool(hToolbar,'CData',cdata,'Tag','Toolbar_Ignore',...
 
 
 
-%% Create Random Grid of points
+%% Create point tool
+% The old uitogglesplittool and Java dropdown menu were removed from
+% current MATLAB versions. The point generator is not needed for manual
+% annotations, so retain only a harmless toggle button.
 cdata = fcn_icon('ico_points_random.gif',[255 0 255]);
-
-% Add the icon to the latest toolbar
-hPoints = uitogglesplittool(hToolbar,'CData',cdata,'Tag','Toolbar_Points',...
-    'TooltipString','Generate points','ClickedCallback',cbPoints{1});
-drawnow; % prevents errors
-
-% Define dropdown menu
-jPoints = get(hPoints,'JavaContainer');
-jMenu = get(jPoints,'MenuComponent');  % or: =jPoints.getMenuComponent
-jOption1 = jMenu.add('Grid (10 points)');
-jOption2 = jMenu.add('Grid (100 points)');
-jOption3 = jMenu.add('Grid (X points)');
-jOption4 = jMenu.add('Random (10 points)');
-jOption5 = jMenu.add('Random (100 points)');
-jOption6 = jMenu.add('Random (X points)');
-% jOption1.setPreferredSize(java.awt.Dimension(150,22));
-% jOption2.setPreferredSize(java.awt.Dimension(150,22));
-% jOption3.setPreferredSize(java.awt.Dimension(150,22));
-% jOption4.setPreferredSize(java.awt.Dimension(150,22));
-% jOption5.setPreferredSize(java.awt.Dimension(150,22));
-% jOption6.setPreferredSize(java.awt.Dimension(150,22));
-jOption1.setIcon(javax.swing.ImageIcon('ico_points_grid10.gif'));
-jOption2.setIcon(javax.swing.ImageIcon('ico_points_grid100.gif'));
-jOption3.setIcon(javax.swing.ImageIcon('ico_points_gridX.gif'));
-jOption4.setIcon(javax.swing.ImageIcon('ico_points_random10.gif'));
-jOption5.setIcon(javax.swing.ImageIcon('ico_points_random100.gif'));
-jOption6.setIcon(javax.swing.ImageIcon('ico_points_randomX.gif'));
-set(jOption1, 'ActionPerformedCallback',cbPoints{2});
-set(jOption2, 'ActionPerformedCallback',cbPoints{3});
-set(jOption3, 'ActionPerformedCallback',cbPoints{4});
-set(jOption4, 'ActionPerformedCallback',cbPoints{5});
-set(jOption5, 'ActionPerformedCallback',cbPoints{6});
-set(jOption6, 'ActionPerformedCallback',cbPoints{7});
-% set(jOption1, 'ActionPerformedCallback', {@myCallbackFcn, extraData});
+hPoints = uitoggletool(hToolbar,'CData',cdata,'Tag','Toolbar_Points',...
+    'TooltipString','Generated points (not used for manual annotations)',...
+    'ClickedCallback',cbPoints{1});
 
 
-%% Save screenshot button
+%% Save screenshot buttons
+% Use ordinary toolbar buttons so no Java/SplitToolbar dependency is needed.
 cdata = fcn_icon('ico_image_screenshot.gif',[255 255 255]);
-
-% Add the icon to the latest toolbar
-hSave = uitogglesplittool(hToolbar,'CData',cdata,'Tag','Toolbar_ImageSave',...
-    'TooltipString','Export current image', 'ClickedCallback',cbSave{1});
-drawnow; % prevents errors
-
-% Define dropdown menu
-jSave = get(hSave,'JavaContainer');
-jSaveMenu = get(jSave,'MenuComponent');  % or: =jSave.getMenuComponent
-jSaveOption1 = jSaveMenu.add('JPG (*.jpg)');
-jSaveOption2 = jSaveMenu.add('TIF (*.tif)');
-jSaveOption3 = jSaveMenu.add('EPS Level 2 (*.eps)');
-jSaveOption4 = jSaveMenu.add('EPS Level 3 (*.eps)');
-% jSaveOption1.setPreferredSize(java.awt.Dimension(150,22));
-% jSaveOption2.setPreferredSize(java.awt.Dimension(150,22));
-% jSaveOption3.setPreferredSize(java.awt.Dimension(150,22));
-% jSaveOption4.setPreferredSize(java.awt.Dimension(150,22));
-jSaveOption1.setIcon(javax.swing.ImageIcon('ico_image_screenshot_JPG.gif'));
-jSaveOption2.setIcon(javax.swing.ImageIcon('ico_image_screenshot_TIF.gif'));
-jSaveOption3.setIcon(javax.swing.ImageIcon('ico_image_screenshot_EPS2.gif'));
-jSaveOption4.setIcon(javax.swing.ImageIcon('ico_image_screenshot_EPS3.gif'));
-set(jSaveOption1, 'ActionPerformedCallback',cbSave{2});
-set(jSaveOption2, 'ActionPerformedCallback',cbSave{3});
-set(jSaveOption3, 'ActionPerformedCallback',cbSave{4});
-set(jSaveOption4, 'ActionPerformedCallback',cbSave{5});
-% set(jSaveOption1, 'ActionPerformedCallback', {@myCallbackFcn, extraData});
-
+hSave = uipushtool(hToolbar,'CData',cdata,'Tag','Toolbar_ImageSavePNG', ...
+    'TooltipString','Export current image as PNG', ...
+    'ClickedCallback',cbSave{2});
+hSaveJPG = uipushtool(hToolbar,'CData',cdata,'Tag','Toolbar_ImageSaveJPG', ...
+    'TooltipString','Export current image as JPG', ...
+    'ClickedCallback',cbSave{3});
 
 
 %% Export button
@@ -219,6 +171,7 @@ set(hPrev,'Separator','on');
 set(findall(h,'Tag','Exploration.ZoomIn'),'Separator','on');
 set(hMeas,'Separator','on');
 set(hSave,'Separator','on');
+set(hSaveJPG,'Separator','off');
 set(hHelp,'Separator','on');
 set(hAbout,'Separator','on');
 
