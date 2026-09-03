@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paparazzi-python"
+version = "0.1.0"
+description = "MATLAB-free desktop edition of PAPARA(ZZ)I 3.0"
+readme = "README_PYTHON.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+authors = [
+  { name = "Yann Marcon and Autun Purser", email = "ymarcon@marum.de" },
+]
+dependencies = ["Pillow>=10.0,<12"]
+
+[project.gui-scripts]
+paparazzi-python = "paparazzi_py.__main__:main"
+
+[tool.setuptools]
+packages = ["paparazzi_py"]
+
